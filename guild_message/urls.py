@@ -16,6 +16,11 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
+from guild_message import views as guild_message_views
+from messenger import views as messenger_views
+
 urlpatterns = [
+    url(r'^$', guild_message_views.index, name='index'),
     url(r'^admin/', admin.site.urls),
+    url(r'^messages/', messenger_views.MessagesView.as_view(), name='messages')
 ]

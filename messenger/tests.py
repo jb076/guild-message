@@ -1,3 +1,15 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 
-# Create your tests here.
+
+# Test gets
+# - Basic Get
+# - User Auth
+# - Date ranges
+# - 
+# Test Creation
+
+class MessagesViewTest(TestCase):
+	def setUp(self):
+		self.client = client()
+
+	def testGet(self):
