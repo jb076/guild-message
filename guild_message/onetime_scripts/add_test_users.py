@@ -10,18 +10,20 @@ django.setup()
 
 from django.contrib.auth.models import User
 
-new_user_one = User.objects.get_or_create(username='jim', defaults={
-	'email': 'jsb@gmail.com', 
+from accounts.models import FriendsList
+
+new_user_one, created = User.objects.get_or_create(username='jim', defaults={
+	'email': 'jsb@gmail.com',
 	'password': 'secretpass'}
 )
-new_user_two = User.objects.get_or_create(username='joe', defaults={
+new_user_two, created = User.objects.get_or_create(username='joe', defaults={
 	'email': 'joe@gmail.com',
 	'password': 'secretpass'}
 )
 
-# friend_list_one = FriendsList.objects.get_or_create(user=new_user_one)
-# friend_list_one.friends.add(new_user_two)
+friend_list_one, created = FriendsList.objects.get_or_create(user=new_user_one)
+friend_list_one.friends.add(new_user_two)
 
-# friend_list_two = FriendsList.objects.get_or_create(user=new_user_two)
-# friend_list_two.friends.add(new_user_one)
+friend_list_two, created = FriendsList.objects.get_or_create(user=new_user_two)
+friend_list_two.friends.add(new_user_one)
 

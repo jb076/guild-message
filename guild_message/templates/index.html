@@ -3,24 +3,33 @@
 <html>
 <head>
   <title>Messanger</title>
-  <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/core.css' %}">
 </head>
 <body>
-  <h1>Super Message App!</h1>
-    {% if is_logged_in == False %}
-      <a href="{% url 'login' %}">Please Log In</a>
-    {% else %}
-      <a href="{% url 'logout' %}">Log Out {{ user.username}}</a>
-    {% endif %}
+  <div class="colMain">
+    <h1>Super Message App!</h1>
+      {% if is_logged_in == False %}
+        <a href="{% url 'login' %}">Please Log In</a>
+      {% else %}
+        <a href="{% url 'logout' %}">Log Out {{ user.username}}</a>
+      {% endif %}
 
-    <div class="userList">
-      <ul>
-      {% for friend in friends %}
-        <li><a href=#>{{friend}}</a></li>
-      {% endfor %}
-      </ul>
-    </div>
+      <div class="userList">
+        <h2>Your Friends</h2>
+          <ul>
+          {% for friend in friends %}
+            <li><a href=#>{{friend}}</a></li>
+          {% endfor %}
+          </ul>
+      </div>
 
+      <div class="chatBox"></div>
+
+      <input class="chatInput" type="text">
+      <button>submit</button>
+  </div>
+  <script type="text/javascript" src="{% static 'js/lib/jquery-3.2.1.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/chat.js' %}"></script>
 
 </body>
 </html>

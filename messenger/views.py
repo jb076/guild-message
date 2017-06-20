@@ -11,7 +11,12 @@ from messenger.models import Message, Conversation
 
 class ConversationsView(View):
 	def get(self, request):
-		pass
+		status = 200
+
+		user = request.user
+		if not user.is_authenticated():
+			status = 401
+			response_package = {'message': 'User is Not Authenticated'}
 
 	def post(self, request):
 		pass
@@ -44,7 +49,6 @@ class MessagesView(View):
 			status = 401
 			response_package = {'message': 'User is Not authenticated'}
 		else:
-
 			conversation_id = request.GET.get('conversationId')
 			# TODO: verify convo exists
 			conversation = Conversation.objects.get(id=conversation_id)
