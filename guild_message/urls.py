@@ -17,10 +17,13 @@ from django.conf.urls import url
 from django.contrib import admin
 
 from guild_message import views as guild_message_views
-from messenger import views as messenger_views
+from apps.messenger import views as messenger_views
+from apps.accounts import views as accounts_views
 
 urlpatterns = [
     url(r'^$', guild_message_views.index, name='index'),
     url(r'^admin/', admin.site.urls),
-    url(r'^messages/', messenger_views.MessagesView.as_view(), name='messages')
+    url(r'^messages/', messenger_views.MessagesView.as_view(), name='messages'),
+    url(r'^login/', accounts_views.LoginView.as_view(), name='login'),
+    url(r'^logout/', accounts_views.LogoutView.as_view(), name='logout'),
 ]

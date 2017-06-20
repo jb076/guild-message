@@ -2,3 +2,6 @@
 # Core
 #########
 Django==1.11.2
+
+# JSON
+simplejson==3.9.0
