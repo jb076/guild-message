@@ -4,7 +4,51 @@ $(function(){
 	var selectedFriend;
 	var lastMessage;
 
-	// From Django Docs...
+	$(document).ready(function(){
+		$(".submit").on('click', function(e){
+			submitMessage();
+		});
+		$(document).keypress(function(e){
+			if(e.which === 13) {
+				submitMessage();
+			}
+		});
+
+		$(".userList li").on("click", function(e){
+			selectedFriend = $(this)[0].textContent;
+			$(".chatMod").removeClass('hide');
+			$.ajax({
+				url: 'conversations/',
+				method: 'GET',
+				data: {'target': selectedFriend},
+				success: function(data) {
+					openConversation = data.conversationId;
+					getMessages();
+				},
+				error: function() {
+					// Error if no convo exists.
+					// Create conversation, then populate (which won't have anything...)
+					$.ajax({
+						url: 'conversations/',
+						method: 'POST',
+						data: {
+							'csrfmiddlewaretoken': csrfToken,
+							'target': selectedFriend
+						},
+						success: function(data) {
+							openConversation = data.conversationId;
+							getMessages();
+						}
+					})
+				}
+			})
+		});
+
+
+		setInterval(update, 2000);
+	})
+
+	// From Django Docs. gets CSRF token for posting
 	function getCookie(name) {
 	    var cookieValue = null;
 	    if (document.cookie && document.cookie != '') {
@@ -20,37 +64,10 @@ $(function(){
 	    }
 	    return cookieValue;
 	}
-
 	var csrfToken = getCookie('csrftoken')
 
-	$(".userList li").on("click", function(e){
-		selectedFriend = $(this)[0].textContent;
-		$.ajax({
-			url: 'conversations/',
-			method: 'GET',
-			data: {'target': selectedFriend},
-			success: function(data) {
-				openConversation = data.conversationId;
-				updateMessages();
-			},
-			error: function() {
-				$.ajax({
-					url: 'conversations/',
-					method: 'POST',
-					data: {
-						'csrfmiddlewaretoken': csrfToken,
-						'target': selectedFriend
-					},
-					success: function(data) {
-						openConversation = data.conversationId;
-						updateMessages();
-					}
-				})
-			}
-		})
-	});
-
-	function updateMessages() {
+	function getMessages() {
+		$(".chatBox").empty();
 		if (typeof openConversation !== 'undefined') {
 			$.ajax({
 				url: 'messages/',
@@ -64,20 +81,6 @@ $(function(){
 			})
 		}
 	}
-
-	$(document).ready(function(){
-		$(".submit").on('click', function(e){
-			submitMessage();
-		});
-		$(document).keypress(function(e){
-			if(e.which === 13) {
-				submitMessage();
-			}
-		});
-
-		setInterval(update, 2000);
-	})
-
 
 	function submitMessage() {
 		var inputBox = $(".chatInput");

@@ -1,3 +1,30 @@
-.colMain {width: 600px; margin: 0 auto;}
+.colMain {
+	width: 600px;
+	margin: 0 auto;
+}
 
-.chatBox {height: 400px; border: solid 1px; overflow: scroll;}
+.chatBox {
+	height: 400px;
+	border: solid 1px;
+	overflow: scroll;
+}
+
+.chatInput {
+	width: 537px;
+	height: 25px;
+}
+
+.submit {
+	height: 35px;
+}
+
+.hide {display: none;}
+
+.friendsList {
+	list-style-type: none;
+	padding: 0;
+}
+
+.friendsList li {font-size: 1.4em;}
+
+.friendsList li:hover {text-decoration: underline;}

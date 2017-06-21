@@ -7,9 +7,6 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.core import exceptions
 
-import simplejson
-
-
 from messenger.models import Message, Conversation
 
 class ConversationsView(View):
@@ -39,10 +36,11 @@ class ConversationsView(View):
 		status = 200
 		user = request.user
 		target = request.POST.get('target')
-		target = User.objects.get(username=user)
+		target = User.objects.get(username=target)
 		new_conversation = Conversation.objects.create()
 		new_conversation.participants.add(user)
 		new_conversation.participants.add(target)
+		print(new_conversation.participants.all())
 		response_package = {'conversationId': new_conversation.id}
 		return JsonResponse(response_package, status=status)
 
@@ -70,28 +68,34 @@ class MessagesView(View):
 		Get messages for a given user-receiver pair
 		"""
 		status = 200
+		response_package = []
 		user = request.user
 		if not user.is_authenticated():
 			status = 401
-			response_package = {'message': 'User is Not authenticated'}
 		else:
 			conversation_id = request.GET.get('conversationId')
-			# TODO: verify convo exists
-			conversation = Conversation.objects.get(id=conversation_id)
-			# get all messages from conversation
-			messages = conversation.messages.all()
-
-			# check if date range...
 			last_message_id = request.GET.get('lastMessage')
-			if last_message_id:
-				last_message = Message.objects.get(id=last_message_id)
-				# Query is not yet evaluated in django so can chain filters like this
-				# without doing additional queries.
-				messages = messages.filter(create_datetime__gt=last_message.create_datetime)
 
-			print(messages)
-			messages = messages.order_by('create_datetime')
-			response_package = [self._serialize_message(message) for message in messages]
+			# Ensure we are getting a request for a conversation
+			try:
+				conversation = Conversation.objects.get(id=conversation_id, participants__in=[user])
+			except Conversation.DoesNotExist:
+				status = 404
+				conversation = None
+
+			if conversation:
+				# get all messages from conversation
+				messages = conversation.messages.all()
+
+				# check if we should only be sending since last received
+				if last_message_id:
+					last_message = Message.objects.get(id=last_message_id)
+					# Query is not yet evaluated in django so can chain filters like this
+					# without doing additional queries.
+					messages = messages.filter(create_datetime__gt=last_message.create_datetime)
+
+				messages = messages.order_by('create_datetime')
+				response_package = [self._serialize_message(message) for message in messages]
 
 		return JsonResponse(response_package, safe=False, status=status)
 
@@ -101,18 +105,20 @@ class MessagesView(View):
 
 		"""
 		status = 200
+		response_package = {}
+
 		user = request.user
 		if not user.is_authenticated():
 			status = 401
-
-		conversation_id = request.POST.get('conversationId')
-		message_content = request.POST.get('message')
-		conversation = Conversation.objects.get(id=conversation_id)
-		message = Message.objects.create(
-			author=user,
-			message=message_content,
-			conversation=conversation
-		)
+		else:
+			conversation_id = request.POST.get('conversationId')
+			message_content = request.POST.get('message')
+			conversation = Conversation.objects.get(id=conversation_id)
+			message = Message.objects.create(
+				author=user,
+				message=message_content,
+				conversation=conversation
+			)
 
 		response_package = [self._serialize_message(message)]
 		return JsonResponse(response_package, safe=False, status=status)
