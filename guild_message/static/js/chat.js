@@ -19,7 +19,10 @@ $(function(){
 		$(".userList li").on("click", function(e){
 			clearInterval(updateInterval);
 			selectedFriend = $(this)[0].textContent;
+
+			// Once we have a conversation selected, show the chat box.
 			$(".chatMod").removeClass('hide');
+			// Either get an existing conversation or create one then open it on the page.
 			$.ajax({
 				url: 'conversations/',
 				method: 'GET',
@@ -87,13 +90,13 @@ $(function(){
 	}
 
 	function getMessages() {
+		// Clear out chat box since we are loading all messages again.
 		$(".chatBox").empty();
 		if (typeof openConversation !== 'undefined') {
 			$.ajax({
 				url: 'messages/',
 				data: {
-					'conversationId': openConversation,
-					'csrfmiddlewaretoken': csrfToken
+					'conversationId': openConversation
 				},
 				method: 'GET',
 				success: function(data) {
@@ -115,7 +118,10 @@ $(function(){
 				lastMessage = message.messageId;
 			}
 		}
-		chatBox.scrollTop(chatBox.prop("scrollHeight"));
+		// Only jump scroll bar to bottom if there are new messages.  Was otherwise irksome.
+		if (messages.length > 0) {
+			chatBox.scrollTop(chatBox.prop("scrollHeight"));
+		}
 	}
 
 	function submitMessage() {
@@ -130,7 +136,6 @@ $(function(){
 				url: 'messages/',
 				data: {
 					'conversationId': openConversation,
-					'csrfmiddlewaretoken': csrfToken,
 					'lastMessage': lastMessage
 				},
 				success: function(data){

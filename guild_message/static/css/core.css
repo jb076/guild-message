@@ -14,12 +14,6 @@
 	height: 25px;
 }
 
-.submit {
-	height: 35px;
-}
-
-.hide {display: none;}
-
 .friendsList {
 	list-style-type: none;
 	padding: 0;
@@ -28,3 +22,12 @@
 .friendsList li {font-size: 1.4em;}
 
 .friendsList li:hover {text-decoration: underline;}
+
+.hide {display: none;}
+
+.submit {
+	height: 35px;
+}
+
+.userList {margin-bottom: 22px}
+
