@@ -3,7 +3,9 @@ $(function(){
 	var openConversation;
 	var selectedFriend;
 	var lastMessage;
+	var updateInterval;
 
+	// Event Bindings on document ready
 	$(document).ready(function(){
 		$(".submit").on('click', function(e){
 			submitMessage();
@@ -15,6 +17,7 @@ $(function(){
 		});
 
 		$(".userList li").on("click", function(e){
+			clearInterval(updateInterval);
 			selectedFriend = $(this)[0].textContent;
 			$(".chatMod").removeClass('hide');
 			$.ajax({
@@ -24,6 +27,7 @@ $(function(){
 				success: function(data) {
 					openConversation = data.conversationId;
 					getMessages();
+					updateInterval = setInterval(update, 2000);
 				},
 				error: function() {
 					// Error if no convo exists.
@@ -38,20 +42,37 @@ $(function(){
 						success: function(data) {
 							openConversation = data.conversationId;
 							getMessages();
+							updateInterval = setInterval(update, 2000);
 						}
-					})
+					});
 				}
-			})
+			});
 		});
+	});
 
+	var csrfToken = getCookie('csrftoken');
 
-		setInterval(update, 2000);
-	})
+	function createMessage(content) {
+		if (typeof openConversation !== 'undefined') {
+			$.ajax({
+				url: 'messages/',
+				data: {
+					'conversationId': openConversation,
+					'csrfmiddlewaretoken': csrfToken,
+					'message': content
+				},
+				method: 'POST',
+				success: function(data){
+					renderMessages(data);
+				}
+			});
+		}
+	}
 
 	// From Django Docs. gets CSRF token for posting
 	function getCookie(name) {
 	    var cookieValue = null;
-	    if (document.cookie && document.cookie != '') {
+	    if (document.cookie && document.cookie !== '') {
 	        var cookies = document.cookie.split(';');
 	        for (var i = 0; i < cookies.length; i++) {
 	            var cookie = jQuery.trim(cookies[i]);
@@ -64,7 +85,6 @@ $(function(){
 	    }
 	    return cookieValue;
 	}
-	var csrfToken = getCookie('csrftoken')
 
 	function getMessages() {
 		$(".chatBox").empty();
@@ -75,43 +95,21 @@ $(function(){
 					'conversationId': openConversation,
 					'csrfmiddlewaretoken': csrfToken
 				},
+				method: 'GET',
 				success: function(data) {
-					addMessages(data);
+					renderMessages(data);
 				}
-			})
+			});
 		}
 	}
 
-	function submitMessage() {
-		var inputBox = $(".chatInput");
-		messages = createMessage(inputBox.val());
-		inputBox.val('');
-	};
-
-	function createMessage(content) {
-		if (typeof openConversation !== 'undefined') {
-			console.log('hello!');
-			$.ajax({
-				url: 'messages/',
-				data: {
-					'conversationId': openConversation,
-					'csrfmiddlewaretoken': csrfToken,
-					'message': content
-				},
-				method: 'POST',
-				success: function(data){
-					addMessages(data);
-				}
-			})
-		}
-	}
-
-	function addMessages(messages) {
+	function renderMessages(messages) {
 		var chatBox = $(".chatBox");
 		for (var i=0; i < messages.length; i += 1) {
 			message = messages[i];
 			chatBox.append(
-				"<p>" + message.author +' '+ message.createTime + ": " + message.message + "</p>"
+				"<p>" + message.author +' '+ message.createTime + ": " + 
+					message.message + "</p>"
 			);
 			if (i === messages.length - 1) {
 				lastMessage = message.messageId;
@@ -120,8 +118,13 @@ $(function(){
 		chatBox.scrollTop(chatBox.prop("scrollHeight"));
 	}
 
+	function submitMessage() {
+		var inputBox = $(".chatInput");
+		messages = createMessage(inputBox.val());
+		inputBox.val('');
+	}
+
 	function update() {
-		console.log(lastMessage);
 		if (typeof openConversation !== 'undefined') {
 			$.ajax({
 				url: 'messages/',
@@ -131,10 +134,10 @@ $(function(){
 					'lastMessage': lastMessage
 				},
 				success: function(data){
-					addMessages(data);
+					renderMessages(data);
 				},
 				method: 'get',
-			})
+			});
 		}
 	}
 });

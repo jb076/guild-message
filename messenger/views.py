@@ -12,20 +12,22 @@ from messenger.models import Message, Conversation
 class ConversationsView(View):
 	def get(self, request):
 		status = 200
+		response_package = {}
 
 		user = request.user
 		target = request.GET.get('target')
+
 		if not user.is_authenticated():
 			status = 401
-			response_package = {'status': 'error', 'message': 'User is Not Authenticated'}
 		else:
-			# Obviously, this breaks when adding 3 participants, the purpose of
-			# conversations...
 			target = User.objects.get(username=target)
-			conversation = Conversation.objects.filter(participants__in=[user, target]).first()
+			# This breaks when adding 3 participants
+			conversation = Conversation.objects\
+				.filter(participants__in=[user, target]).first()
+
 			if conversation == None:
+				# Would want to a more specific status code here for no convo vs not auth'd
 				status = 404
-				response_package = {'status': 'error', 'message': 'User is Not Authenticated'}
 			else:
 				conversation = conversation
 				response_package = {'conversationId': conversation.id}
@@ -35,33 +37,20 @@ class ConversationsView(View):
 	def post(self, request):
 		status = 200
 		user = request.user
-		target = request.POST.get('target')
-		target = User.objects.get(username=target)
+		target_username = request.POST.get('target')
+		target = User.objects.get(username=target_username)
 		new_conversation = Conversation.objects.create()
 		new_conversation.participants.add(user)
 		new_conversation.participants.add(target)
-		print(new_conversation.participants.all())
+
 		response_package = {'conversationId': new_conversation.id}
 		return JsonResponse(response_package, status=status)
 
-	def put(self, request):
-		# Normally wouldn't put this here but giving an idea of where
-		# the design was going.  This is where users would be able to
-		# add people to a conversation
-		pass
 
 class MessagesView(View):
 	"""
 	Endpoint for handling message fetching/creation
 	"""
-	def _serialize_message(self, message):
-		message_dict = {}
-		message_dict['conversation'] = message.conversation.id
-		message_dict['message'] = message.message
-		message_dict['messageId'] = message.id
-		message_dict['author'] = message.author.username
-		message_dict['createTime'] = message.create_datetime.strftime('%H:%M:%S')
-		return message_dict
 
 	def get(self, request):
 		"""
@@ -95,7 +84,7 @@ class MessagesView(View):
 					messages = messages.filter(create_datetime__gt=last_message.create_datetime)
 
 				messages = messages.order_by('create_datetime')
-				response_package = [self._serialize_message(message) for message in messages]
+				response_package = [message.serialize() for message in messages]
 
 		return JsonResponse(response_package, safe=False, status=status)
 
@@ -120,6 +109,5 @@ class MessagesView(View):
 				conversation=conversation
 			)
 
-		response_package = [self._serialize_message(message)]
+		response_package = [message.serialize()]
 		return JsonResponse(response_package, safe=False, status=status)
-

@@ -3,14 +3,26 @@ A demo project for Guild Education.  It's a simple messenger application.
 
 # Setup
 1.  Install python 3 if not already installed.
-2.  Install virtualenv wrapper
+2.  [Install virtualenv wrapper](http://virtualenvwrapper.readthedocs.io/en/latest/)
 3.  Create virtual env ```mkvirtualenv <name>```
 4.  Install Requirements
 ```
 cd <repo base dir>
 pip install -r requirements.txt
 ```
-5.  Runserver ```python manage.py runserver```
+
+5. Run migrations
+```
+python manage.py migrate
+```
+6. Run included onetime script to give you the semi-hardcoded users
+```
+# From Base Repo
+python ./guild_message/onetime_scripts/add_test_users.py
+
+```
+7.  Run Server ```python manage.py runserver```
+
 
 # Development Thoughts
 ## Why Django
@@ -27,4 +39,7 @@ I'll be polling the server in order to update messages.  For production software
 
 4. Wishing I had named Messenger "Messages."  As we used to say in my old office "naming is hard..."
 
-5.  I really do not like tying conversations to user-receiver.  Instead, I think messages would be better with a "conversation"	
+5.  I really do not like tying conversations to user-receiver.  Instead, I think messages would be better with a "conversation."  *Ended up just doing this.
+
+6. Potential timing issue with updates.  I wanted to show entered messages ASAP, and since I am polling, I did not want to wait for next request.  However, with the way last message is working, this could potentially cause an issue where users enter messages and more or less the same time and a message would be missed.
+

@@ -13,5 +13,11 @@ class Message(models.Model):
 	message = models.TextField(default='')
 	create_datetime = models.DateTimeField(auto_now_add=True)
 
-
-
+	def serialize(self):
+		message_dict = {}
+		message_dict['conversation'] = self.conversation.id
+		message_dict['message'] = self.message
+		message_dict['messageId'] = self.id
+		message_dict['author'] = self.author.username
+		message_dict['createTime'] = self.create_datetime.strftime('%H:%M:%S')
+		return message_dict

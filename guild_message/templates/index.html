@@ -14,14 +14,16 @@
         <a href="{% url 'logout' %}">Log Out {{ user.username}}</a>
       {% endif %}
 
-      <div class="userList">
-        <h3>Choose a Friend to Start a Conversation</h2>
-          <ul class="friendsList">
-            {% for friend in friends %}
-              <li>{{ friend }}</li>
-            {% endfor %}
-          </ul>
-      </div>
+      {% if friends %}
+        <div class="userList">
+          <h3>Choose a Friend to Start a Conversation</h2>
+            <ul class="friendsList">
+              {% for friend in friends %}
+                <li>{{ friend }}</li>
+              {% endfor %}
+            </ul>
+        </div>
+      {% endif %}
 
       <div class="chatMod hide">
         <div class="chatBox"></div>
