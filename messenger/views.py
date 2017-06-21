@@ -1,3 +1,5 @@
+import datetime
+
 from django.shortcuts import render
 from django.views.generic import View
 from django.http import Http404, JsonResponse
@@ -7,6 +9,7 @@ from django.core import exceptions
 
 import simplejson
 
+
 from messenger.models import Message, Conversation
 
 class ConversationsView(View):
@@ -14,12 +17,34 @@ class ConversationsView(View):
 		status = 200
 
 		user = request.user
+		target = request.GET.get('target')
 		if not user.is_authenticated():
 			status = 401
-			response_package = {'message': 'User is Not Authenticated'}
+			response_package = {'status': 'error', 'message': 'User is Not Authenticated'}
+		else:
+			# Obviously, this breaks when adding 3 participants, the purpose of
+			# conversations...
+			target = User.objects.get(username=target)
+			conversation = Conversation.objects.filter(participants__in=[user, target]).first()
+			if conversation == None:
+				status = 404
+				response_package = {'status': 'error', 'message': 'User is Not Authenticated'}
+			else:
+				conversation = conversation
+				response_package = {'conversationId': conversation.id}
+
+		return JsonResponse(response_package, status=status)
 
 	def post(self, request):
-		pass
+		status = 200
+		user = request.user
+		target = request.POST.get('target')
+		target = User.objects.get(username=user)
+		new_conversation = Conversation.objects.create()
+		new_conversation.participants.add(user)
+		new_conversation.participants.add(target)
+		response_package = {'conversationId': new_conversation.id}
+		return JsonResponse(response_package, status=status)
 
 	def put(self, request):
 		# Normally wouldn't put this here but giving an idea of where
@@ -35,8 +60,9 @@ class MessagesView(View):
 		message_dict = {}
 		message_dict['conversation'] = message.conversation.id
 		message_dict['message'] = message.message
+		message_dict['messageId'] = message.id
 		message_dict['author'] = message.author.username
-		message_dict['createDate'] = message.create_datetime.isoformat(' ')
+		message_dict['createTime'] = message.create_datetime.strftime('%H:%M:%S')
 		return message_dict
 
 	def get(self, request):
@@ -56,13 +82,18 @@ class MessagesView(View):
 			messages = conversation.messages.all()
 
 			# check if date range...
-			start_date = request.GET.get('startDate')
-			if start_date:
+			last_message_id = request.GET.get('lastMessage')
+			if last_message_id:
+				last_message = Message.objects.get(id=last_message_id)
 				# Query is not yet evaluated in django so can chain filters like this
 				# without doing additional queries.
-				messages = messages.filter(create_date__gte=start_date)
-			response_package = {message.id: self._serialize_message(message) for message in messages}
-		return JsonResponse(response_package, status=status)
+				messages = messages.filter(create_datetime__gt=last_message.create_datetime)
+
+			print(messages)
+			messages = messages.order_by('create_datetime')
+			response_package = [self._serialize_message(message) for message in messages]
+
+		return JsonResponse(response_package, safe=False, status=status)
 
 	def post(self, request):
 		"""
@@ -74,6 +105,15 @@ class MessagesView(View):
 		if not user.is_authenticated():
 			status = 401
 
-		response_package = {'okay': 'yes'}
-		return JsonResponse(response_package, status=status)
+		conversation_id = request.POST.get('conversationId')
+		message_content = request.POST.get('message')
+		conversation = Conversation.objects.get(id=conversation_id)
+		message = Message.objects.create(
+			author=user,
+			message=message_content,
+			conversation=conversation
+		)
+
+		response_package = [self._serialize_message(message)]
+		return JsonResponse(response_package, safe=False, status=status)
 

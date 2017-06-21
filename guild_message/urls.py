@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^$', guild_message_views.index, name='index'),
     url(r'^admin/', admin.site.urls),
     url(r'^messages/', messenger_views.MessagesView.as_view(), name='messages'),
+    url(r'^conversations/', messenger_views.ConversationsView.as_view(), name='conversations'),
     url(r'^login/', accounts_views.LoginView.as_view(), name='login'),
     url(r'^logout/', accounts_views.LogoutView.as_view(), name='logout'),
 ]
