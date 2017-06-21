@@ -16,9 +16,10 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
+from accounts import views as accounts_views
 from guild_message import views as guild_message_views
 from messenger import views as messenger_views
-from accounts import views as accounts_views
+
 
 urlpatterns = [
     url(r'^$', guild_message_views.index, name='index'),
