@@ -17,10 +17,10 @@ class ConversationsView(View):
             status = 401
         else:
             target = User.objects.get(username=target)
-            # This breaks when adding 3 participants
+            # This got ugly.  I would want a better way to filter on participants to ensure its the exact
+            # X # of participants.
             conversation = Conversation.objects\
-                .filter(participants__in=[user, target]).first()
-
+                .filter(participants__in=[user]).filter(participants__in=[target]).first()
             if conversation is None:
                 # Would want to a more specific status code here for no convo vs not auth'd
                 status = 404

@@ -35,6 +35,7 @@ $(function(){
 				error: function() {
 					// Error if no convo exists.
 					// Create conversation, then populate (which won't have anything...)
+					openConversation = null;
 					$.ajax({
 						url: 'conversations/',
 						method: 'POST',
@@ -46,7 +47,8 @@ $(function(){
 							openConversation = data.conversationId;
 							getMessages();
 							updateInterval = setInterval(update, 2000);
-						}
+						},
+						error: function(){openConversation = null;}
 					});
 				}
 			});
