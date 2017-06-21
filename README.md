@@ -4,7 +4,7 @@ A demo project for Guild Education.  It's a simple messenger application.
 # Setup
 1.  Install python 3 if not already installed.
 2.  [Install virtualenv wrapper](http://virtualenvwrapper.readthedocs.io/en/latest/)
-3.  Create virtual env ```mkvirtualenv <name>```
+3.  Create virtual env ```mkvirtualenv --python=<-path to Python eg:/usr/bin/python3-> <name>```
 4.  Install Requirements
 ```
 cd <repo base dir>
@@ -47,3 +47,4 @@ I'll be polling the server in order to update messages.  For production software
 
 8. I ended up not using bootstrap.  In keeping with the guidelines, I kept the visuals pretty simple so it was just easier to throw a few basic styles together.
 
+9.  Would probably do some more tests.  Last message ranged requests would be especially important, but really just overall coverage.  I used TDD just getting the endpoints up and running but then ran away with development on the details so tests did not end up where I'd consider to be "good coverage."
