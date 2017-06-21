@@ -5,20 +5,6 @@ from messenger.tests import helpers
 from messenger.views import MessagesView
 
 
-class ConversationViewTest(TestCase):
-    def setUp(self):
-        pass
-
-    def test_get(self):
-        pass
-
-    def test_post(self):
-        pass
-
-    def test_user_verification(self):
-        pass
-
-
 class MessagesViewTest(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -43,4 +29,3 @@ class MessagesViewTest(TestCase):
     def test_unauthenticated_user(self):
         response = self.client.get(reverse('messages'), {'conversationId': self.conversation.id})
         self.assertTrue(response.status_code == 401)
-

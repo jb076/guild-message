@@ -43,3 +43,5 @@ I'll be polling the server in order to update messages.  For production software
 
 6. Potential timing issue with updates.  I wanted to show entered messages ASAP, and since I am polling, I did not want to wait for next request.  However, with the way last message is working, this could potentially cause an issue where users enter messages and more or less the same time and a message would be missed.
 
+7.  Better statuses/structured packages in the future would be beneficial.
+

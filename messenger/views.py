@@ -34,6 +34,7 @@ class ConversationsView(View):
         status = 200
         user = request.user
         target_username = request.POST.get('target')
+
         target = User.objects.get(username=target_username)
         new_conversation = Conversation.objects.create()
         new_conversation.participants.add(user)
@@ -54,6 +55,7 @@ class MessagesView(View):
         """
         status = 200
         response_package = []
+
         user = request.user
         if not user.is_authenticated():
             status = 401
